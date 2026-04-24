@@ -80,12 +80,12 @@ app.use((err, req, res, next) => {
 // ════════════════════════════════════════════
 app.listen(PORT, () => {
   console.log('════════════════════════════════════════');
-  console.log('  🎓 API Gestion des Enseignants - SUJET 26');
+  console.log('   API Gestion des Enseignants - SUJET 26');
   console.log('════════════════════════════════════════');
-  console.log(`  ✅ Serveur démarré sur le port ${PORT}`);
-  console.log(`  🌐 URL : http://localhost:${PORT}`);
+  console.log(`  Serveur démarré sur le port ${PORT}`);
+  console.log(`  URL : http://localhost:${PORT}`);
   console.log('────────────────────────────────────────');
-  console.log('  📋 Endpoints disponibles :');
+  console.log('   Endpoints disponibles :');
   console.log(`  POST   http://localhost:${PORT}/api/auth/register`);
   console.log(`  POST   http://localhost:${PORT}/api/auth/login`);
   console.log(`  GET    http://localhost:${PORT}/api/auth/me`);
