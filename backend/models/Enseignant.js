@@ -49,6 +49,20 @@ class Enseignant {
   }
 
   // ─────────────────────────────────────────
+  // Générer automatiquement un numEns unique
+  // Format : ENS001, ENS002, ...
+  // ─────────────────────────────────────────
+  static async generateNumEns() {
+    const [rows] = await db.query(
+      `SELECT numEns FROM enseignants ORDER BY id DESC LIMIT 1`
+    );
+    if (!rows.length) return 'ENS001';
+    const last = rows[0].numEns; // ex: "ENS005"
+    const num  = parseInt(last.replace(/\D/g, ''), 10) + 1;
+    return 'ENS' + String(num).padStart(3, '0');
+  }
+
+  // ─────────────────────────────────────────
   // Créer un nouvel enseignant
   // ─────────────────────────────────────────
   static async create({ numEns, nom, nbHeures, tauxHoraire }) {
@@ -62,22 +76,25 @@ class Enseignant {
     return await Enseignant.findById(result.insertId);
   }
 
+
   // ─────────────────────────────────────────
   // Modifier un enseignant existant
+  // numEns n'est pas modifiable (auto-généré)
   // ─────────────────────────────────────────
-  static async update(id, { numEns, nom, nbHeures, tauxHoraire }) {
+  static async update(id, { nom, nbHeures, tauxHoraire }) {
     const sql = `
       UPDATE enseignants
-      SET numEns = ?, nom = ?, nbHeures = ?, tauxHoraire = ?
+      SET nom = ?, nbHeures = ?, tauxHoraire = ?
       WHERE id = ?
     `;
-    const [result] = await db.query(sql, [numEns, nom, nbHeures, tauxHoraire, id]);
+    const [result] = await db.query(sql, [nom, nbHeures, tauxHoraire, id]);
 
     if (result.affectedRows === 0) return null;
 
     // Retourner l'enseignant mis à jour
     return await Enseignant.findById(id);
   }
+
 
   // ─────────────────────────────────────────
   // Supprimer un enseignant

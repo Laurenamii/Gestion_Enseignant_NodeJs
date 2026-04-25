@@ -66,13 +66,13 @@ const getEnseignantById = async (req, res) => {
 // ─────────────────────────────────────────────────────────
 const createEnseignant = async (req, res) => {
   try {
-    const { numEns, nom, nbHeures, tauxHoraire } = req.body;
+    const { nom, nbHeures, tauxHoraire } = req.body;
 
     // ── Validation des champs obligatoires ──
-    if (!numEns || !nom || nbHeures === undefined || tauxHoraire === undefined) {
+    if (!nom || nbHeures === undefined || tauxHoraire === undefined) {
       return res.status(400).json({
         success: false,
-        message: 'Tous les champs sont obligatoires : numEns, nom, nbHeures, tauxHoraire.'
+        message: 'Champs obligatoires : nom, nbHeures, tauxHoraire.'
       });
     }
 
@@ -80,26 +80,18 @@ const createEnseignant = async (req, res) => {
     if (isNaN(nbHeures) || isNaN(tauxHoraire)) {
       return res.status(400).json({
         success: false,
-        message: 'nbHeures et tauxHoraire doivent être des nombres valides.'
+        message: 'nbHeures et tauxHoraire doivent être des nombres.'
       });
     }
-
-    // ── Validation des valeurs positives ──
     if (Number(nbHeures) < 0 || Number(tauxHoraire) < 0) {
       return res.status(400).json({
         success: false,
-        message: 'nbHeures et tauxHoraire doivent être des valeurs positives.'
+        message: 'nbHeures et tauxHoraire doivent être positifs.'
       });
     }
 
-    // ── Vérifier si le numéro d'enseignant existe déjà ──
-    const existing = await Enseignant.findByNumEns(numEns);
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: `Le numéro d'enseignant "${numEns}" existe déjà.`
-      });
-    }
+    // ── Générer numEns automatiquement ──
+    const numEns = await Enseignant.generateNumEns();
 
     // ── Créer l'enseignant ──
     const newEnseignant = await Enseignant.create({
@@ -109,24 +101,20 @@ const createEnseignant = async (req, res) => {
       tauxHoraire: Number(tauxHoraire)
     });
 
-    // Réponse avec le message demandé par le sujet
     return res.status(201).json({
       success: true,
-      message: 'Insertion/modification réussie',   // Message du sujet
+      message: 'Insertion/modification réussie',
       data: newEnseignant
     });
 
   } catch (error) {
     console.error('Erreur createEnseignant:', error);
-
-    // Gérer l'erreur de doublon MySQL (code 1062)
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({
         success: false,
-        message: 'Ce numéro d\'enseignant existe déjà en base de données.'
+        message: 'Ce numéro d\'enseignant existe déjà.'
       });
     }
-
     return res.status(500).json({
       success: false,
       message: "Erreur lors de la création de l'enseignant.",
@@ -138,12 +126,12 @@ const createEnseignant = async (req, res) => {
 // ─────────────────────────────────────────────────────────
 // PUT /api/enseignants/:id
 // Modifier un enseignant existant
-// Body attendu : { numEns, nom, nbHeures, tauxHoraire }
+// Body attendu : { nom, nbHeures, tauxHoraire }
 // ─────────────────────────────────────────────────────────
 const updateEnseignant = async (req, res) => {
   try {
     const { id } = req.params;
-    const { numEns, nom, nbHeures, tauxHoraire } = req.body;
+    const { nom, nbHeures, tauxHoraire } = req.body; // numEns auto-généré, non modifiable
 
     // ── Vérifier que l'enseignant existe ──
     const existing = await Enseignant.findById(id);
@@ -155,10 +143,10 @@ const updateEnseignant = async (req, res) => {
     }
 
     // ── Validation des champs obligatoires ──
-    if (!numEns || !nom || nbHeures === undefined || tauxHoraire === undefined) {
+    if (!nom || nbHeures === undefined || tauxHoraire === undefined) {
       return res.status(400).json({
         success: false,
-        message: 'Tous les champs sont obligatoires : numEns, nom, nbHeures, tauxHoraire.'
+        message: 'Champs obligatoires : nom, nbHeures, tauxHoraire.'
       });
     }
 
@@ -166,41 +154,31 @@ const updateEnseignant = async (req, res) => {
     if (isNaN(nbHeures) || isNaN(tauxHoraire)) {
       return res.status(400).json({
         success: false,
-        message: 'nbHeures et tauxHoraire doivent être des nombres valides.'
+        message: 'nbHeures et tauxHoraire doivent être des nombres.'
       });
     }
-
     if (Number(nbHeures) < 0 || Number(tauxHoraire) < 0) {
       return res.status(400).json({
         success: false,
-        message: 'nbHeures et tauxHoraire doivent être des valeurs positives.'
+        message: 'nbHeures et tauxHoraire doivent être positifs.'
       });
     }
 
-    // ── Mettre à jour l'enseignant ──
+    // ── Mettre à jour l'enseignant (numEns conservé) ──
     const updated = await Enseignant.update(id, {
-      numEns,
       nom,
-      nbHeures: Number(nbHeures),
+      nbHeures:    Number(nbHeures),
       tauxHoraire: Number(tauxHoraire)
     });
 
     return res.status(200).json({
       success: true,
-      message: 'Insertion/modification réussie',   // Message du sujet
+      message: 'Insertion/modification réussie',
       data: updated
     });
 
   } catch (error) {
     console.error('Erreur updateEnseignant:', error);
-
-    if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({
-        success: false,
-        message: 'Ce numéro d\'enseignant est déjà utilisé par un autre enregistrement.'
-      });
-    }
-
     return res.status(500).json({
       success: false,
       message: "Erreur lors de la mise à jour de l'enseignant.",

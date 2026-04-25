@@ -1,0 +1,36 @@
+/* ── Reset & Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f0f2f5;
+}
+
+/* ── Input focus global ── */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Highlight de focus pour les champs glassmorphism de la page login */
+.input-wrap:focus-within {
+  border-color: rgba(99, 102, 241, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* ── Scrollbar personnalisée ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 3px; }
+
+/* ── Boutons hover effect ── */
+button { transition: transform 0.1s ease, box-shadow 0.1s ease; }
+button:hover:not(:disabled) { transform: translateY(-1px); }
+button:active:not(:disabled) { transform: translateY(0); }
